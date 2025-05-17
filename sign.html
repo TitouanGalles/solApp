@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Signature Solana</title>
+</head>
+<body>
+  <h1>Connexion avec Phantom</h1>
+  <button onclick="signMessage()">Se connecter & signer</button>
+  <pre id="output"></pre>
+
+  <script type="module">
+    import bs58 from "https://cdn.jsdelivr.net/npm/bs58@5.0.0/+esm"; // Importer bs58 en tant que module
+
+    async function signMessage() {
+      const provider = window.solana;
+      const output = document.getElementById("output");
+
+      if (!provider?.isPhantom) {
+        output.textContent = "Phantom n'est pas installé.";
+        return;
+      }
+
+      try {
+        // Connexion au wallet
+        const resp = await provider.connect();
+        const walletAddress = provider.publicKey.toString();
+
+        // Message à signer
+        const message = "Authentification Solana";
+        const encodedMessage = new TextEncoder().encode(message);
+
+        // Signature du message
+        const signedMessage = await provider.signMessage(encodedMessage, 'utf8');
+
+        // Encodage en base58
+        const signature = bs58.encode(signedMessage.signature);
+
+        output.textContent = JSON.stringify({
+          walletAddress,
+          message,
+          signature
+        }, null, 2);
+
+        // Tu peux ici envoyer le résultat à ton backend avec fetch si tu veux
+
+      } catch (err) {
+        output.textContent = "Erreur : " + err.message;
+      }
+    }
+
+    // Attache la fonction globalement pour le bouton
+    window.signMessage = signMessage;
+  </script>
+</body>
+</html>
